@@ -2,8 +2,8 @@
 export default {
   content: [
     "./index.html",
-    "./node_modules/flowbite/**/*.js",
-    "./src/**/*.{js,ts,jsx,tsx}",
+    "node_modules/flowbite-react/lib/esm/**/*.js",
+    "./src/**/*.{js,jsx,ts,tsx}",
   ],
   theme: {
     extend: {
@@ -60,7 +60,9 @@ export default {
       },
     },
   },
-  plugins: [require("flowbite/plugin")],
+  plugins: [
+    require('flowbite/plugin')
+  ],
 };
 
 // module.exports = {
