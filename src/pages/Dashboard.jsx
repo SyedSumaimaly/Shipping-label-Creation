@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
-import 'flowbite';
-import CSVReader from 'react-csv-reader'
+import "flowbite";
+import CSVReader from "react-csv-reader";
+import { usePDF } from "react-to-pdf";
 
 import "../App.css";
 
 function Dashboard() {
+  const { toPDF, targetRef } = usePDF({ filename: "page.pdf" });
   const navigate = useNavigate();
   const auth = getAuth();
   const [user, setUser] = useState(null);
@@ -47,7 +49,7 @@ function Dashboard() {
                   type="button"
                   className="inline-flex items-center p-2 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
                 >
-                  <span className="sr-only">Open sidebar</span>
+                  <p className="sr-only">Open sidebar</p>
                   <svg
                     className="w-6 h-6"
                     aria-hidden="true"
@@ -63,9 +65,9 @@ function Dashboard() {
                   </svg>
                 </button>
                 <a href="/" className="flex ms-2 md:me-24">
-                  <span className="self-center text-xl font-bold sm:text-2xl whitespace-nowrap dark:text-white">
+                  <p className="self-center text-xl font-bold sm:text-2xl whitespace-nowrap dark:text-white">
                     Label Creation
-                  </span>
+                  </p>
                 </a>
               </div>
               <div className="flex items-center">
@@ -81,305 +83,86 @@ function Dashboard() {
             </div>
           </div>
         </nav>
-
         <div class="mt-8 flex items-center justify-center w-11/12 mx-auto">
-          <label for="dropzone-file" class="flex flex-col items-center justify-center w-full h-36 border-2 border-gray-300 border-dashed cursor-pointer">
+          <label
+            for="dropzone-file"
+            class="flex flex-col items-center justify-center w-full h-36 border-2 border-gray-300 border-dashed cursor-pointer"
+          >
             <CSVReader
-              cssClass="mx-auto m-0 p-0" onFileLoaded={(data, fileInfo, originalFile) => console.dir(data, fileInfo, originalFile)} />
+              cssClass="mx-auto m-0 p-0"
+              onFileLoaded={(data, fileInfo, originalFile) =>
+                console.dir(data, fileInfo, originalFile)
+              }
+            />
           </label>
         </div>
-
-        {/* <div className="w-full  mt-2 mx-auto">
-          <CSVReader inputId="dropzone-file"
-            class="hidden" onFileLoaded={(data, fileInfo, originalFile) => console.dir(data, fileInfo, originalFile)} />
-        </div> */}
-
-        {/* <aside
-          id="logo-sidebar"
-          className="fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
-          aria-label="Sidebar"
-        >
-          <div className="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
-            <ul className="space-y-2 font-medium">
-              <li>
-                <a
-                  href="#"
-                  className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
-                >
-                  <svg
-                    className="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="currentColor"
-                    viewBox="0 0 22 21"
-                  >
-                    <path d="M16.975 11H10V4.025a1 1 0 0 0-1.066-.998 8.5 8.5 0 1 0 9.039 9.039.999.999 0 0 0-1-1.066h.002Z" />
-                    <path d="M12.5 0c-.157 0-.311.01-.565.027A1 1 0 0 0 11 1.02V10h8.975a1 1 0 0 0 1-.935c.013-.188.028-.374.028-.565A8.51 8.51 0 0 0 12.5 0Z" />
-                  </svg>
-                  <span className="ms-3">Dashboard</span>
-                </a>
-              </li>
-            </ul>
-          </div>
-        </aside> */}
-
-        {/* <div className="p-4 sm:ml-64">
-          <div class="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700 mt-14">
-            <div class="grid grid-cols-3 gap-4 mb-4">
-              <div class="flex items-center justify-center h-24 rounded bg-gray-50 dark:bg-gray-800">
-                <p class="text-2xl text-gray-400 dark:text-gray-500">
-                  <svg
-                    class="w-3.5 h-3.5"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 18 18"
-                  >
-                    <path
-                      stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M9 1v16M1 9h16"
-                    />
-                  </svg>
-                </p>
+        <div>
+          <button onClick={() => toPDF()}>Download PDF</button>
+          <div
+            ref={targetRef}
+            className="bg-white w-[30%] mx-auto border-[3px] border-black "
+          >
+            <div className="flex flex-row items-start justify-between  p-2">
+              <div className="text-sm ">
+                <p>YOUR BEST CHOICE</p>
+                <p>1204723601</p>
+                <p>3712 LIBERTY HEIGHTS AVE</p>
+                <p>BALTIMORE MD 21215</p>
               </div>
-              <div class="flex items-center justify-center h-24 rounded bg-gray-50 dark:bg-gray-800">
-                <p class="text-2xl text-gray-400 dark:text-gray-500">
-                  <svg
-                    class="w-3.5 h-3.5"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 18 18"
-                  >
-                    <path
-                      stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M9 1v16M1 9h16"
-                    />
-                  </svg>
-                </p>
+              <div>
+                <p className="font-bold text-md">8 LBS</p>
+                <p className=" text-sm">DWT:16,8,8</p>
               </div>
-              <div class="flex items-center justify-center h-24 rounded bg-gray-50 dark:bg-gray-800">
-                <p class="text-2xl text-gray-400 dark:text-gray-500">
-                  <svg
-                    class="w-3.5 h-3.5"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 18 18"
-                  >
-                    <path
-                      stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M9 1v16M1 9h16"
-                    />
-                  </svg>
-                </p>
+              <div>
+                <p className="font-bold text-lg"> 1 OF 1</p>
               </div>
             </div>
-            <div class="flex items-center justify-center h-48 mb-4 rounded bg-gray-50 dark:bg-gray-800">
-              <p class="text-2xl text-gray-400 dark:text-gray-500">
-                <svg
-                  class="w-3.5 h-3.5"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 18 18"
-                >
-                  <path
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M9 1v16M1 9h16"
-                  />
-                </svg>
+            <div className="mt-4 p-2">
+              <p className="font-bold">SHIP TO:</p>
+              <div className="ml-8">
+                <span className="block -mb-1 m-0">AMY REEVES</span>
+                <span className="block -mb-1 m-0">3131378163</span>
+                <span className="block -mb-1 m-0">23698 RTE 4</span>
+                <span className="block -mb-1 font-bold text-2xl my-1">
+                  CARLINVILLE IL 62626
+                </span>
+              </div>
+            </div>
+            <div className="w-full h-[1px] bg-black"></div>
+            <div className="flex justify-between">
+              <div className="w-[30%] p-2 h-[30%] ">
+                <div className="w-[100px] flex items-center justify-center bg-neutral-500 h-20 mx-auto"></div>
+              </div>
+              <div className="w-[70%]  border-l-[1px] border-black p-2 h-[30%]">
+                <p className="font-bold text-4xl">IL 626 9-49</p>
+                <div className="w-[200px] bg-black h-10 mx-auto"></div>
+              </div>
+            </div>
+            <div className="w-full h-[6px] bg-black"></div>
+            <div className="flex flex-row items-end justify-between">
+              <div>
+                <p className="font-bold text-3xl">UPS 2ND DAY AIR</p>
+                <p className="p-1">TRACKING #: 1Z X98 882 02 8852 3743</p>
+              </div>
+              <div>
+                <p className="font-bold text-6xl">2</p>
+              </div>
+            </div>
+            <div className="w-full h-[2px] bg-black"></div>
+            <div className="h-10"></div>
+            <div className="w-full h-[6px] bg-black"></div>
+            <div>
+              <p className="text-sm">BILLING: P/P</p>
+              <p className="text-sm">DESC: Fudge Stripe Cookie 36CT 1 PACK</p>
+              <p className="mt-2 font-medium text-sm">
+                REF #1: 200011641433876
               </p>
             </div>
-            <div class="grid grid-cols-2 gap-4 mb-4">
-              <div class="flex items-center justify-center rounded bg-gray-50 h-28 dark:bg-gray-800">
-                <p class="text-2xl text-gray-400 dark:text-gray-500">
-                  <svg
-                    class="w-3.5 h-3.5"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 18 18"
-                  >
-                    <path
-                      stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M9 1v16M1 9h16"
-                    />
-                  </svg>
-                </p>
-              </div>
-              <div class="flex items-center justify-center rounded bg-gray-50 h-28 dark:bg-gray-800">
-                <p class="text-2xl text-gray-400 dark:text-gray-500">
-                  <svg
-                    class="w-3.5 h-3.5"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 18 18"
-                  >
-                    <path
-                      stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M9 1v16M1 9h16"
-                    />
-                  </svg>
-                </p>
-              </div>
-              <div class="flex items-center justify-center rounded bg-gray-50 h-28 dark:bg-gray-800">
-                <p class="text-2xl text-gray-400 dark:text-gray-500">
-                  <svg
-                    class="w-3.5 h-3.5"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 18 18"
-                  >
-                    <path
-                      stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M9 1v16M1 9h16"
-                    />
-                  </svg>
-                </p>
-              </div>
-              <div class="flex items-center justify-center rounded bg-gray-50 h-28 dark:bg-gray-800">
-                <p class="text-2xl text-gray-400 dark:text-gray-500">
-                  <svg
-                    class="w-3.5 h-3.5"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 18 18"
-                  >
-                    <path
-                      stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M9 1v16M1 9h16"
-                    />
-                  </svg>
-                </p>
-              </div>
-            </div>
-            <div class="flex items-center justify-center h-48 mb-4 rounded bg-gray-50 dark:bg-gray-800">
-              <p class="text-2xl text-gray-400 dark:text-gray-500">
-                <svg
-                  class="w-3.5 h-3.5"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 18 18"
-                >
-                  <path
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M9 1v16M1 9h16"
-                  />
-                </svg>
-              </p>
-            </div>
-            <div class="grid grid-cols-2 gap-4">
-              <div class="flex items-center justify-center rounded bg-gray-50 h-28 dark:bg-gray-800">
-                <p class="text-2xl text-gray-400 dark:text-gray-500">
-                  <svg
-                    class="w-3.5 h-3.5"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 18 18"
-                  >
-                    <path
-                      stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M9 1v16M1 9h16"
-                    />
-                  </svg>
-                </p>
-              </div>
-              <div class="flex items-center justify-center rounded bg-gray-50 h-28 dark:bg-gray-800">
-                <p class="text-2xl text-gray-400 dark:text-gray-500">
-                  <svg
-                    class="w-3.5 h-3.5"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 18 18"
-                  >
-                    <path
-                      stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M9 1v16M1 9h16"
-                    />
-                  </svg>
-                </p>
-              </div>
-              <div class="flex items-center justify-center rounded bg-gray-50 h-28 dark:bg-gray-800">
-                <p class="text-2xl text-gray-400 dark:text-gray-500">
-                  <svg
-                    class="w-3.5 h-3.5"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 18 18"
-                  >
-                    <path
-                      stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M9 1v16M1 9h16"
-                    />
-                  </svg>
-                </p>
-              </div>
-              <div class="flex items-center justify-center rounded bg-gray-50 h-28 dark:bg-gray-800">
-                <p class="text-2xl text-gray-400 dark:text-gray-500">
-                  <svg
-                    class="w-3.5 h-3.5"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 18 18"
-                  >
-                    <path
-                      stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M9 1v16M1 9h16"
-                    />
-                  </svg>
-                </p>
-              </div>
+            <div className="flex items-end justify-end mt-6">
+              <p className="text-sm">ISH 13.00F LASER 15.5V 01/2024</p>
             </div>
           </div>
-        </div> */}
+        </div>
       </>
     );
   } else {
