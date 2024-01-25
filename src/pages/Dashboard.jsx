@@ -4,14 +4,26 @@ import { useNavigate } from "react-router-dom";
 import "flowbite";
 import CSVReader from "react-csv-reader";
 import { usePDF } from "react-to-pdf";
+import generatePDF, { Resolution, Margin } from 'react-to-pdf';
+import Barcode from 'react-barcode';
+import { randomAlphanumeric } from "random-string-alphanumeric-generator";
+import JSZip from "jszip";
 
 import "../App.css";
+const options = {
+  page: {
+    format: 'A5',
+  },
+};
 
 function Dashboard() {
   const { toPDF, targetRef } = usePDF({ filename: "page.pdf" });
   const navigate = useNavigate();
   const auth = getAuth();
   const [user, setUser] = useState(null);
+  const [csvData, setCsvData] = useState(null);
+  const getTargetElement = () => document.getElementById('content-id');
+  const [allPdfData, setAllPdfData] = useState([]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -33,6 +45,29 @@ function Dashboard() {
     } catch (error) {
       console.error("Error logging out:", error);
     }
+  };
+
+  const handleDownloadAll = async () => {
+    const zip = new JSZip();
+
+    await Promise.all(csvData.map(async (data, index) => {
+      const trackingId = randomAlphanumeric(18, "uppercase");
+      const pdfData = generatePDF(() => document.getElementById(`content-id-${index}`), options);
+
+      // Add the PDF data to the zip file
+      zip.file(`${trackingId}.pdf`, pdfData, { binary: true });
+    }));
+
+    // Generate the zip file
+    const zipBlob = await zip.generateAsync({ type: "blob" });
+
+    // Create a link element to trigger the download
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(zipBlob);
+    link.download = "all_pdfs.zip";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   if (user) {
@@ -83,85 +118,106 @@ function Dashboard() {
             </div>
           </div>
         </nav>
-        <div class="mt-8 flex items-center justify-center w-11/12 mx-auto">
+        <div className="mt-8 flex items-center justify-center w-11/12 mx-auto">
           <label
-            for="dropzone-file"
-            class="flex flex-col items-center justify-center w-full h-36 border-2 border-gray-300 border-dashed cursor-pointer"
+            htmlFor="dropzone-file"
+            className="flex flex-col items-center justify-center w-full h-36 border-2 border-gray-300 border-dashed cursor-pointer"
           >
             <CSVReader
               cssClass="mx-auto m-0 p-0"
-              onFileLoaded={(data, fileInfo, originalFile) =>
-                console.dir(data, fileInfo, originalFile)
-              }
+              onFileLoaded={(data, fileInfo, originalFile) =>{
+                data.shift();
+                setCsvData(data)
+                console.log(data);
+              }}
             />
           </label>
         </div>
-        <div>
-          <button onClick={() => toPDF()}>Download PDF</button>
-          <div
-            ref={targetRef}
-            className="bg-white w-[30%] mx-auto border-[3px] border-black "
-          >
-            <div className="flex flex-row items-start justify-between  p-2">
-              <div className="text-sm ">
-                <p>YOUR BEST CHOICE</p>
-                <p>1204723601</p>
-                <p>3712 LIBERTY HEIGHTS AVE</p>
-                <p>BALTIMORE MD 21215</p>
-              </div>
-              <div>
-                <p className="font-bold text-md">8 LBS</p>
-                <p className=" text-sm">DWT:16,8,8</p>
-              </div>
-              <div>
-                <p className="font-bold text-lg"> 1 OF 1</p>
+        {csvData ? (
+          <button onClick={handleDownloadAll} className="bg-blue-50 text-blue-600 rounded-lg py-2 px-6 hover:bg-blue-100 border border-blue-600 m-4">
+          Download All PDFs
+        </button>
+        ) : (
+          ''
+        )}
+        <div className="flex justify-start space-x-4 p-2 overflow-x-scroll">
+          {csvData ? csvData.length > 0 && csvData?.map((data, index) => {
+          let trackingId = randomAlphanumeric(18, "uppercase");
+          return(
+            <div className="w-[400px]" key={index} id={`content-id-${index}`}>
+              {/* <button onClick={() => generatePDF(getTargetElement, options)}>Download PDF</button> */}
+              <div
+               
+                className="bg-white border-[3px] border-black "
+              >
+                <div className="flex flex-row items-start justify-between p-1">
+                  <div className="text-sm ">
+                    <p>{data[0]}</p>
+                    <p>1204723601</p>
+                    <p>{data[2]}</p>
+                    <p>{data[4] + " " + data[5] + " " + data[6]}</p>
+                  </div>
+                  <div>
+                    <p className="font-bold text-md">{data[16]} LBS</p>
+                    <p className=" text-sm">DWT:16,8,8</p>
+                  </div>
+                  <div>
+                    <p className="font-bold text-lg"> {index + 1} OF {csvData.length}</p>
+                  </div>
+                </div>
+                <div className="p-1">
+                  <p className="font-bold">SHIP TO:</p>
+                  <div className="ml-3">
+                    <span className="block -mb-1 m-0">{data[8]}</span>
+                    <span className="block -mb-1 m-0">3131378163</span>
+                    <span className="block -mb-1 m-0">{data[10]}</span>
+                    <span className="block font-bold mb-1 text-2xl">
+                    {data[12] + " " + data[13] + " " + data[14]}
+                    </span>
+                  </div>
+                </div>
+                <div className="w-full h-[1px] bg-black"></div>
+                <div className="flex justify-between">
+                  <div className="w-[30%] p-1">
+                    <div className="w-[100px] flex items-center justify-center mx-auto">
+
+                    </div>
+                  </div>
+                  <div className="w-[70%]  border-l-[1px] border-black p-1">
+                    <p className="font-bold text-3xl mb-4">IL 626 9-49</p>
+                    <div className="w-[200px] mx-auto">
+                      <Barcode value="barcode-example" height={50} width={0.9} displayValue={false} />
+                    </div>
+                  </div>
+                </div>
+                <div className="w-full h-[6px] bg-black"></div>
+                <div className="flex flex-row items-start justify-between">
+                  <div>
+                    <p className="font-bold text-3xl">UPS 2ND DAY AIR</p>
+                    <p className="">TRACKING #: {trackingId}</p>
+                  </div>
+                  <div>
+                    <p className="font-bold text-5xl">2</p>
+                  </div>
+                </div>
+                <div className="w-full mt-2 h-[2px] bg-black"></div>
+                <div className="flex justify-center"><Barcode value={trackingId} height={70} width={1} displayValue={false} /></div>
+                <div className="w-full h-[6px] bg-black"></div>
+                <div>
+                  <p className="text-sm">BILLING: P/P</p>
+                  <p className="text-sm">DESC: {data[20]}</p>
+                  <p className="mt-1 font-medium text-sm">
+                    REF #1: {data[21]}
+                  </p>
+                </div>
+                <div className="flex items-end justify-end mt-4 p-1">
+                  <p className="text-sm">ISH 13.00F LASER 15.5V 01/2024</p>
+                </div>
               </div>
             </div>
-            <div className="mt-4 p-2">
-              <p className="font-bold">SHIP TO:</p>
-              <div className="ml-8">
-                <span className="block -mb-1 m-0">AMY REEVES</span>
-                <span className="block -mb-1 m-0">3131378163</span>
-                <span className="block -mb-1 m-0">23698 RTE 4</span>
-                <span className="block -mb-1 font-bold text-2xl my-1">
-                  CARLINVILLE IL 62626
-                </span>
-              </div>
-            </div>
-            <div className="w-full h-[1px] bg-black"></div>
-            <div className="flex justify-between">
-              <div className="w-[30%] p-2 h-[30%] ">
-                <div className="w-[100px] flex items-center justify-center bg-neutral-500 h-20 mx-auto"></div>
-              </div>
-              <div className="w-[70%]  border-l-[1px] border-black p-2 h-[30%]">
-                <p className="font-bold text-4xl">IL 626 9-49</p>
-                <div className="w-[200px] bg-black h-10 mx-auto"></div>
-              </div>
-            </div>
-            <div className="w-full h-[6px] bg-black"></div>
-            <div className="flex flex-row items-end justify-between">
-              <div>
-                <p className="font-bold text-3xl">UPS 2ND DAY AIR</p>
-                <p className="p-1">TRACKING #: 1Z X98 882 02 8852 3743</p>
-              </div>
-              <div>
-                <p className="font-bold text-6xl">2</p>
-              </div>
-            </div>
-            <div className="w-full h-[2px] bg-black"></div>
-            <div className="h-10"></div>
-            <div className="w-full h-[6px] bg-black"></div>
-            <div>
-              <p className="text-sm">BILLING: P/P</p>
-              <p className="text-sm">DESC: Fudge Stripe Cookie 36CT 1 PACK</p>
-              <p className="mt-2 font-medium text-sm">
-                REF #1: 200011641433876
-              </p>
-            </div>
-            <div className="flex items-end justify-end mt-6">
-              <p className="text-sm">ISH 13.00F LASER 15.5V 01/2024</p>
-            </div>
-          </div>
+          )}) : (
+            ''
+          )}
         </div>
       </>
     );
