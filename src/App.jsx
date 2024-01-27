@@ -3,13 +3,14 @@ import "./App.css";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Login from "./pages/login";
 import Dashboard from "./pages/Dashboard";
+import MainDocument from "./pages/MainDocument";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Login />} />
-        {/* <Route path="/" element={<MainDocument />} /> */}
+        <Route path="/MainDocument" element={<MainDocument />} />
         <Route path="/Dashboard" element={<Dashboard />} />
       </Routes>
     </BrowserRouter>
