@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@react-pdf/renderer": "^3.3.3",
+    "@react-pdf/renderer": "^3.3.4",
     "axios": "^1.6.6",
     "easy-pdf-merge": "^0.2.6",
     "file-saver": "^2.0.5",
@@ -25,6 +25,7 @@
     "react-barcode": "^1.4.6",
     "react-csv-reader": "^4.0.0",
     "react-dom": "^18.2.0",
+    "react-jsbarcode": "^0.4.2",
     "react-qrcode": "^0.3.6",
     "react-router-dom": "^6.21.3",
     "react-to-pdf": "^1.0.1",
