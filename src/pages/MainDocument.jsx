@@ -7,7 +7,7 @@ import SecondDocument from "./SecondDocument";
 
 const MainDocument = ({ csvData, selectedOption }) => (
   <div>
-    {selectedOption === "UPS Air" ? (
+    {selectedOption === "UPS 2ND DAY AIR" ? (
       <PDFViewer style={{ width: "100%", height: 1200, margin: "auto" }}>
         <MyDocument csvData={csvData} />
       </PDFViewer>
@@ -18,7 +18,7 @@ const MainDocument = ({ csvData, selectedOption }) => (
     )}
     <PDFDownloadLink
       document={
-        selectedOption === "UPS Air" ? (
+        selectedOption === "UPS 2ND DAY AIR" ? (
           <MyDocument csvData={csvData} />
         ) : (
           <SecondDocument csvData={csvData} />

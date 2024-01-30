@@ -12,6 +12,8 @@ import { randomAlphanumeric } from "random-string-alphanumeric-generator";
 
 // import { Barcode } from "@react-pdf/barcode";
 import Barcode from "react-barcode";
+import bwipjs from "bwip-js";
+
 // import Barcode from "react-jsbarcode";
 
 const styles = StyleSheet.create({
@@ -43,16 +45,86 @@ const SecondDocument = ({ csvData }) => {
 
     return `${month}/${year}`;
   };
+
+  const canvasRef = React.useRef(null);
+  // Access the canvas element here
+
+  const generateMaxiCodeImage = (barcodeValueTwo) => {
+    const canvas = document.createElement("canvas");
+    try {
+      bwipjs.toCanvas(canvas, {
+        bcid: "maxicode",
+        text: barcodeValueTwo,
+        scale: 3,
+        height: 10,
+        includetext: true,
+        textxalign: "center",
+      });
+      return canvas.toDataURL();
+    } catch (e) {
+      console.error("Error generating MaxiCode:", e);
+      return null;
+    }
+  };
+
   return (
     <Document>
       {csvData &&
         csvData.length > 0 &&
         csvData.map((data, index) => {
-          const trackingId = randomAlphanumeric(18, "uppercase");
+          const maxiCodeImage = generateMaxiCodeImage(
+            `01 96${
+              data && data[14]?.padEnd(9, "0")
+            } 840 002 1Z10838454 UPSN 40612Y 015 1/1 ${data[16]} N ${
+              data[10]
+            } ${data[13]}`
+          );
+          console.log(
+            `01 96${data[14]?.padEnd(
+              9,
+              "0"
+            )} 840 002 1Z10838454 UPSN 40612Y 015 1/1 ${data && data[16]} N ${
+              data[10]
+            } ${data[13]}`
+          );
+          if (
+            !data[0] ||
+            !data[2] ||
+            !data[4] ||
+            !data[5] ||
+            !data[6] ||
+            !data[7] ||
+            !data[8] ||
+            !data[16] ||
+            !data[17] ||
+            !data[18] ||
+            !data[19] ||
+            !data[15] ||
+            !data[10] ||
+            !data[12] ||
+            !data[13] ||
+            !data[14] ||
+            !data[20] ||
+            !data[21] ||
+            !data[22]
+          ) {
+            return null;
+          }
+          const generateUpsTrackingNumber = () => {
+            const randomSection = `${Math.floor(Math.random() * 10000)
+              .toString()
+              .padStart(4, "0")}`;
+
+            return `1Z 723 90Y 02 ${randomSection.slice(
+              0,
+              4
+            )} ${randomSection.slice(4)}`;
+          };
+          const trackingId = generateUpsTrackingNumber();
           let canvas, canvas2;
           const zipCode = data[14];
           const barcodeValue = `420${
-            zipCode?.length === 5 ? zipCode : zipCode.slice(0, 9)
+            zipCode?.length === 5 ? zipCode : zipCode?.slice(0, 9)
           }`;
           console.log(barcodeValue);
           canvas = document.createElement("canvas");
@@ -71,7 +143,8 @@ const SecondDocument = ({ csvData }) => {
           });
           const barcode2 = canvas2.toDataURL();
 
-          console.log(data, "datadatadatadatadata");
+          const randomTwoDigitNumber = Math.floor(Math.random() * 90) + 10;
+
           return (
             <Page size="A5" key={index} id={`content-id-${index}`}>
               <View>
@@ -87,35 +160,65 @@ const SecondDocument = ({ csvData }) => {
                   >
                     <View
                       style={{
+                        display: "flex",
                         flexDirection: "row",
                         alignItems: "flex-start",
-                        justifyContent: "space-between",
-                        padding: 8,
+                        // justifyContent: "space-between",
                       }}
                     >
-                      <View style={{ fontSize: 14 }}>
+                      <View style={{ fontSize: "12px" }}>
                         <Text>{data[0]}</Text>
-                        <Text>1204723601</Text>
+                        <Text>{data[7]}</Text>
                         <Text>{data[2]}</Text>
                         <Text>{`${data[4]} ${data[5]} ${data[6]}`}</Text>
                       </View>
-                      <View>
-                        <Text
-                          style={{ fontWeight: "bold", fontSize: 18 }}
-                        >{`${data[16]} LBS`}</Text>
-                        <Text style={{ fontSize: 14 }}>
-                          DWT: {getCurrentDate()}
+                      <View
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          marginLeft: 30,
+                        }}
+                      >
+                        <View
+                          style={{
+                            display: "flex",
+                            flexDirection: "row",
+                            alignItems: "center",
+                            // borderWidth: 1,
+                            // borderColor: "black",
+                          }}
+                        >
+                          <Text
+                            style={{ fontWeight: "bold", fontSize: 18 }}
+                          >{`${data[16]} LBS`}</Text>
+                          <Text
+                            style={{
+                              fontWeight: "ultrabold",
+                              fontSize: 20,
+                              marginLeft: 13,
+                            }}
+                          >
+                            1 OF 1
+                          </Text>
+                        </View>
+                        <Text style={{ fontSize: "12px", marginLeft: 12 }}>
+                          DWT: {`${data[17]},${data[18]},${data[19]}`}
                         </Text>
                       </View>
-                      <View>
-                        <Text style={{ fontWeight: "bold", fontSize: 20 }}>{`${
-                          index + 1
-                        } OF ${csvData.length}`}</Text>
-                      </View>
+                      <View></View>
                     </View>
-                    <View style={{ padding: 8 }}>
-                      <Text style={{ fontWeight: "bold" }}>SHIP TO:</Text>
-                      <View style={{ marginLeft: 12 }}>
+                    <View style={{ padding: 0, marginTop: 28 }}>
+                      <Text
+                        style={{
+                          fontWeight: "bold",
+                          color: "black",
+                          fontSize: "14px",
+                        }}
+                      >
+                        SHIP TO:
+                      </Text>
+                      <View style={{ marginLeft: 12, fontSize: "12px" }}>
                         <Text
                           style={{
                             display: "block",
@@ -132,7 +235,7 @@ const SecondDocument = ({ csvData }) => {
                             margin: 0,
                           }}
                         >
-                          3131378163
+                          {data[15]}
                         </Text>
                         <Text
                           style={{
@@ -148,18 +251,20 @@ const SecondDocument = ({ csvData }) => {
                             display: "block",
                             fontWeight: "bold",
                             marginBottom: 1,
-                            fontSize: 20,
+                            fontSize: "14px",
+                            marginLeft: 1,
                           }}
-                        >{`${data[12]} ${data[13]} ${data[14]}`}</Text>
+                        >{`${data[13]} ${data[14]}`}</Text>
                         <Text
                           style={{
                             display: "block",
                             fontWeight: "extrabold",
+                            marginTop: 10,
                             marginBottom: 1,
                             fontSize: 24,
                           }}
                         >
-                          HAGERSTOWN MD 21740-2116
+                          {`HAGERSTOWN ${data[13]} ${data[14]}`}
                         </Text>
                       </View>
                     </View>
@@ -176,7 +281,7 @@ const SecondDocument = ({ csvData }) => {
                         justifyContent: "space-between",
                       }}
                     >
-                      <View style={{ width: "30%", padding: 8 }}>
+                      <View style={{ width: "30%", padding: 1 }}>
                         <View
                           style={{
                             width: 100,
@@ -185,34 +290,39 @@ const SecondDocument = ({ csvData }) => {
                             justifyContent: "center",
                             margin: "auto",
                           }}
-                        ></View>
+                        >
+                          {maxiCodeImage && <Image src={maxiCodeImage} />}
+                        </View>
                       </View>
                       <View
                         style={{
                           width: "70%",
+                          height: 110,
+                          padding: 0,
                           borderLeftWidth: 1,
                           borderLeftColor: "#000",
-                          padding: 8,
+                          position: "relative",
                         }}
                       >
                         <Text
                           style={{
                             fontWeight: "bold",
                             fontSize: 30,
-                            marginBottom: 20,
+                            marginBottom: 0,
+                            zIndex: 10,
                           }}
                         >
-                          MD 217 9-78
+                          {`${data[13]} ${
+                            data[14]?.slice(0, 3) || ""
+                          } 9-${randomTwoDigitNumber}`}
                         </Text>
-                        <View style={{ marginTop: -24 }}>
-                          {/* <Barcode value="barcode-example" /> */}
-                          <Image src={barcode} />
-                          {/* <Barcode
-                            value="ABC123"
-                            options={{ format: "code128" }}
-                            renderer="svg"
-                          /> */}
-                        </View>
+                        <Image
+                          src={barcode}
+                          style={{
+                            marginVertical: 1,
+                            zIndex: 0,
+                          }}
+                        />
                       </View>
                     </View>
                     <View
@@ -224,6 +334,7 @@ const SecondDocument = ({ csvData }) => {
                     ></View>
                     <View
                       style={{
+                        display: "flex",
                         flexDirection: "row",
                         alignItems: "flex-start",
                         justifyContent: "space-between",
@@ -233,30 +344,28 @@ const SecondDocument = ({ csvData }) => {
                         <Text style={{ fontWeight: "bold", fontSize: 30 }}>
                           UPS GROUND
                         </Text>
-                        <Text style={{}}>TRACKING #: {trackingId}</Text>
+                        <Text style={{ fontSize: "12px" }}>
+                          TRACKING #: {trackingId}
+                        </Text>
                       </View>
-                      <View>
-                        <View
-                          style={{
-                            // margin: 'auto',
-                            backgroundColor: "black",
-                            width: 60,
-                            height: 60,
-                            display: "flex",
-                            justifyContent: "flex-end",
-                            // alignItems: "baseline",
-                            alignContent: "flex-end",
-                          }}
-                        ></View>
-                        {/* <Text style={{ fontWeight: "bold", fontSize: 50 }}>
-                          2
-                        </Text> */}
-                      </View>
+                      <View
+                        style={{
+                          // margin: 'auto',
+                          marginTop: -0.3,
+                          backgroundColor: "black",
+                          width: 60,
+                          height: 60.5,
+                          display: "flex",
+                          justifyContent: "flex-end",
+                          // alignItems: "baseline",
+                          alignContent: "flex-end",
+                        }}
+                      ></View>
                     </View>
                     <View
                       style={{
                         width: "100%",
-                        marginTop: 2,
+                        // marginTop: 2,
                         height: 2,
                         backgroundColor: "#000",
                       }}
@@ -281,26 +390,24 @@ const SecondDocument = ({ csvData }) => {
                     ></View>
                     <View>
                       <Text style={{ fontSize: 14 }}>BILLING: P/P</Text>
-                      {/* <Text style={{ fontSize: 14 }}>DESC: {data[20]}</Text>
-                      <Text
-                        style={{
-                          marginTop: 1,
-                          fontWeight: "medium",
-                          fontSize: 14,
-                        }}
-                      >
-                        REF #1: {data[21]}
-                      </Text> */}
                     </View>
                     <View
                       style={{
+                        display: "flex",
                         flexDirection: "flex-end",
                         justifyContent: "flex-end",
-                        marginTop: 20,
-                        padding: 8,
+                        alignItems: "flex-end",
+                        marginTop: 60,
+                        padding: 0.1,
                       }}
                     >
-                      <Text style={{ fontSize: 14, textAlign: "right" }}>
+                      <Text
+                        style={{
+                          fontSize: 14,
+                          textAlign: "right",
+                          marginRight: 6,
+                        }}
+                      >
                         {`ISH 13.00F LASER 15.5V ${getCurrentMonth()}`}
                       </Text>
                     </View>
