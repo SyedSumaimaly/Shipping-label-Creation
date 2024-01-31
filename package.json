@@ -12,6 +12,7 @@
   "dependencies": {
     "@react-pdf/renderer": "^3.3.4",
     "axios": "^1.6.6",
+    "bwip-js": "^4.2.0",
     "easy-pdf-merge": "^0.2.6",
     "file-saver": "^2.0.5",
     "firebase": "^10.7.2",
