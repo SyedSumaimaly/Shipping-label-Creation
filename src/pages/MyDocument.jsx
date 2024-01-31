@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Image,
   Canvas,
+  Font,
 } from "@react-pdf/renderer";
 import { randomAlphanumeric } from "random-string-alphanumeric-generator";
 import bwipjs from "bwip-js";
@@ -16,15 +17,53 @@ import bwipjs from "bwip-js";
 import Barcode from "react-barcode";
 // import Barcode from "react-jsbarcode";
 
+Font.register({
+  family: "Poppins",
+  fonts: [
+    {
+      src: "../../public/Poppins/Poppins-SemiBold.ttf",
+      fontWeight: 600,
+    },
+    {
+      src: "../../public/Poppins/Poppins-Bold.ttf",
+      fontWeight: 700,
+    },
+    {
+      src: "../../public/Poppins/Poppins-ExtraBold.ttf",
+      fontWeight: 900,
+    },
+  ],
+});
+
 const styles = StyleSheet.create({
-  page: {
-    flexDirection: "row",
-    backgroundColor: "#E4E4E4",
+  semiBoldText: {
+    fontFamily: "Poppins",
+    fontWeight: 600,
   },
-  section: {
-    margin: 10,
-    padding: 10,
-    flexGrow: 1,
+  boldText: {
+    fontWeight: 700, // This will use the 700 font weight
+    fontFamily: "Poppins",
+  },
+  extraboldText: {
+    fontWeight: 900,
+    fontFamily: "Poppins",
+  },
+  normal: {
+    fontFamily: "Poppins",
+    fontWeight: 600,
+    fontSize: 12,
+  },
+  normalTwo: {
+    fontFamily: "Poppins",
+    fontWeight: 600,
+    fontSize: 10,
+  },
+  second: {
+    fontWeight: 700,
+    fontSize: 42,
+    fontFamily: "Poppins",
+    paddingRight: 4,
+    marginTop: -8,
   },
 });
 
@@ -58,6 +97,40 @@ const MyDocument = ({ csvData }) => {
         scale: 3,
         height: 10,
         includetext: true,
+        textxalign: "center",
+      });
+      return canvas.toDataURL();
+    } catch (e) {
+      console.error("Error generating MaxiCode:", e);
+      return null;
+    }
+  };
+  const generateBarCodeImage = (barcodeValueThree) => {
+    const canvas = document.createElement("canvas");
+    try {
+      bwipjs.toCanvas(canvas, {
+        bcid: "code11",
+        text: barcodeValueThree,
+        scale: 1,
+        height: 10,
+        includetext: false,
+        textxalign: "center",
+      });
+      return canvas.toDataURL();
+    } catch (e) {
+      console.error("Error generating MaxiCode:", e);
+      return null;
+    }
+  };
+  const generateBarCodeTwoImage = (barcodeValueFour) => {
+    const canvas = document.createElement("canvas");
+    try {
+      bwipjs.toCanvas(canvas, {
+        bcid: "code128",
+        text: barcodeValueFour,
+        scale: 1,
+        height: 10,
+        includetext: false,
         textxalign: "center",
       });
       return canvas.toDataURL();
@@ -121,33 +194,34 @@ const MyDocument = ({ csvData }) => {
             )} ${randomSection.slice(4)}`;
           };
           const trackingId = generateUpsTrackingNumber();
-          // const trackingId = randomAlphanumeric(18, "uppercase");
-          let canvas, canvas2;
+          console.log(trackingId, "trackingId");
+          // let canvas, canvas2;
           const zipCode = data[14];
           const barcodeValue = `420${
             zipCode?.length === 5 ? zipCode : zipCode?.slice(0, 9)
           }`;
-          console.log(barcodeValue);
-          canvas = document.createElement("canvas");
-          JsBarcode(canvas, barcodeValue, {
-            displayValue: false,
-            width: 1,
-            height: 30,
-          });
-          const barcode = canvas.toDataURL();
+          console.log("barcodeValue One", barcodeValue, "barcodeValue One");
+          // canvas = document.createElement("canvas");
+          // JsBarcode(canvas, barcodeValue, {
+          //   displayValue: false,
+          //   width: 1,
+          //   height: 30,
+          // });
+          // const barcode = canvas.toDataURL();
 
-          canvas2 = document.createElement("canvas");
-          JsBarcode(canvas2, trackingId, {
-            displayValue: false,
-            width: 1,
-            height: 50,
-          });
-          const barcode2 = canvas2.toDataURL();
-
+          // canvas2 = document.createElement("canvas");
+          // JsBarcode(canvas2, trackingId, {
+          //   displayValue: false,
+          //   width: 1,
+          //   height: 50,
+          // });
+          // const barcode2 = canvas2.toDataURL();
+          const barcodeOne = generateBarCodeImage(barcodeValue);
+          const barcodeTwo = generateBarCodeTwoImage(trackingId);
           const randomTwoDigitNumber = Math.floor(Math.random() * 90) + 10;
 
           return (
-            <Page size="A5" key={index} id={`content-id-${index}`}>
+            <Page size="A6" key={index} id={`content-id-${index}`}>
               <View>
                 <View
                 // className="w-[400px]"
@@ -164,10 +238,11 @@ const MyDocument = ({ csvData }) => {
                         display: "flex",
                         flexDirection: "row",
                         alignItems: "flex-start",
+                        padding: 2,
                         // justifyContent: "space-between",
                       }}
                     >
-                      <View style={{ fontSize: "12px" }}>
+                      <View style={{ fontSize: "8px" }}>
                         <Text>{data[0]}</Text>
                         <Text>{data[7]}</Text>
                         <Text>{data[2]}</Text>
@@ -178,49 +253,40 @@ const MyDocument = ({ csvData }) => {
                           display: "flex",
                           flexDirection: "column",
                           alignItems: "center",
-                          marginLeft: 20,
+                          marginLeft: 30,
                         }}
                       >
                         <View
                           style={{
+                            marginLeft: 10,
                             display: "flex",
                             flexDirection: "row",
                             alignItems: "center",
+                            justifyContent: "space-between",
+                            width: 75,
                             // borderWidth: 1,
                             // borderColor: "black",
                           }}
                         >
-                          <Text
-                            style={{ fontWeight: "bold", fontSize: 18 }}
-                          >{`${data[16]} LBS`}</Text>
-                          <Text
-                            style={{
-                              fontWeight: "ultrabold",
-                              fontSize: 20,
-                              marginLeft: 13,
-                            }}
-                          >
-                            1 OF 1
-                          </Text>
+                          <Text style={styles.normal}>{`${data[16]} LBS`}</Text>
+                          <Text style={styles.normal}>1 OF 1</Text>
                         </View>
-                        <Text style={{ fontSize: "12px", marginLeft: 8 }}>
+                        <Text style={{ fontSize: "8px", marginLeft: 20 }}>
                           DWT: {`${data[17]},${data[18]},${data[19]}`}
                         </Text>
                       </View>
                       <View></View>
                     </View>
 
-                    <View style={{ padding: 0, marginTop: 28 }}>
-                      <Text
+                    <View style={{ padding: 0, marginTop: 16, paddingLeft: 2 }}>
+                      <Text style={styles.normalTwo}>SHIP TO:</Text>
+                      <View
                         style={{
-                          fontWeight: "bold",
-                          color: "black",
-                          fontSize: "14px",
+                          marginLeft: 12,
+                          fontSize: "9px",
+                          marginTop: -2,
                         }}
                       >
-                        SHIP TO:
-                      </Text>
-                      <View style={{ marginLeft: 12, fontSize: "12px" }}>
                         <Text
                           style={{
                             display: "block",
@@ -249,12 +315,16 @@ const MyDocument = ({ csvData }) => {
                           {data[10]}
                         </Text>
                         <Text
-                          style={{
-                            display: "block",
-                            fontWeight: "bold",
-                            marginBottom: 1,
-                            fontSize: 20,
-                          }}
+                          style={
+                            ({
+                              display: "block",
+                              fontWeight: "bold",
+                              marginBottom: 1,
+                              fontSize: "14",
+                              marginTop: 6,
+                            },
+                            styles.boldText)
+                          }
                         >{`${data[12]} ${data[13]} ${data[14]}`}</Text>
                       </View>
                     </View>
@@ -274,7 +344,7 @@ const MyDocument = ({ csvData }) => {
                       <View style={{ width: "30%", padding: 1 }}>
                         <View
                           style={{
-                            width: 100,
+                            width: 80,
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
@@ -282,43 +352,50 @@ const MyDocument = ({ csvData }) => {
                           }}
                         >
                           {maxiCodeImage && <Image src={maxiCodeImage} />}
-                          {/* <Canvas
-                            ref={canvasRef}
-                            id="mycanvas"
-                            style={{ width: 100, height: 100 }}
-                          ></Canvas> */}
                         </View>
                       </View>
                       <View
                         style={{
                           width: "70%",
-                          height: 110,
+                          height: 80,
                           padding: 0,
+                          paddingLeft: 4,
                           borderLeftWidth: 1,
                           borderLeftColor: "#000",
                           position: "relative",
                         }}
                       >
                         <Text
-                          style={{
-                            fontWeight: "bold",
-                            fontSize: 30,
-                            marginBottom: 0,
-                            zIndex: 10,
-                          }}
+                          style={
+                            ({
+                              fontSize: 22,
+                              marginBottom: 0,
+                              zIndex: 10,
+                              // padddingLeft: 10,
+                              marginTop: 2,
+                            },
+                            styles.extraboldText)
+                          }
                         >
                           {`${data[13]} ${
                             data[14]?.slice(0, 3) || ""
                           } 9-${randomTwoDigitNumber}`}
                         </Text>
-
-                        <Image
-                          src={barcode}
-                          style={{
-                            marginVertical: 1,
-                            zIndex: 0,
-                          }}
-                        />
+                        {barcodeOne && (
+                          <Image
+                            src={barcodeOne}
+                            style={{
+                              width: 150,
+                              height: 45,
+                              paddingVertical: 1,
+                              // borderWidth: 1,
+                              // borderColor: "black",
+                              // margin: "auto",
+                              // marginHorizontal: "auto",
+                              marginLeft: 8,
+                            }}
+                          />
+                        )}
                       </View>
                     </View>
                     <View
@@ -330,29 +407,34 @@ const MyDocument = ({ csvData }) => {
                     ></View>
                     <View
                       style={{
+                        display: "flex",
                         flexDirection: "row",
-                        alignItems: "flex-start",
+                        alignItems: "start",
                         justifyContent: "space-between",
+                        marginBottom: -10,
                       }}
                     >
-                      <View>
-                        <Text style={{ fontWeight: "bold", fontSize: 30 }}>
+                      <View style={{ marginLeft: 3 }}>
+                        <Text style={({ fontSize: "24px" }, styles.boldText)}>
                           UPS 2ND DAY AIR
                         </Text>
-                        <Text style={{ fontSize: "12px" }}>
+                        <Text
+                          style={{
+                            fontSize: "10px",
+                            paddingHorizontal: 2,
+                            marginVertical: -2,
+                          }}
+                        >
                           TRACKING #: {trackingId}
                         </Text>
                       </View>
                       <View>
-                        <Text style={{ fontWeight: "bold", fontSize: 50 }}>
-                          2
-                        </Text>
+                        <Text style={styles.second}>2</Text>
                       </View>
                     </View>
                     <View
                       style={{
                         width: "100%",
-                        marginTop: 2,
                         height: 2,
                         backgroundColor: "#000",
                       }}
@@ -361,16 +443,14 @@ const MyDocument = ({ csvData }) => {
                       style={{
                         flexDirection: "row",
                         justifyContent: "center",
-                        height: 100,
+                        height: 90,
+                        width: 220,
+                        marginHorizontal: "auto",
+                        paddingVertical: 6,
+                        // paddingHorizontal: 2,
                       }}
                     >
-                      <Image src={barcode2} />
-                      {/* <Barcode
-                        value={trackingId}
-                        height={70}
-                        width={1}
-                        displayValue={false}
-                      /> */}
+                      {barcodeTwo && <Image src={barcodeTwo} />}
                     </View>
                     <View
                       style={{
@@ -379,14 +459,14 @@ const MyDocument = ({ csvData }) => {
                         backgroundColor: "#000",
                       }}
                     ></View>
-                    <View>
-                      <Text style={{ fontSize: 14 }}>BILLING: P/P</Text>
-                      <Text style={{ fontSize: 14 }}>DESC: {data[20]}</Text>
+                    <View style={{ padding: 1 }}>
+                      <Text style={{ fontSize: "8px" }}>BILLING: P/P</Text>
+                      <Text style={{ fontSize: "8px" }}>DESC: {data[20]}</Text>
                       <Text
                         style={{
-                          marginTop: 20.1,
+                          marginTop: 10,
                           fontWeight: "medium",
-                          fontSize: 14,
+                          fontSize: "8px",
                         }}
                       >
                         REF #1: {data[21]}
@@ -395,7 +475,7 @@ const MyDocument = ({ csvData }) => {
                         style={{
                           marginTop: 1,
                           fontWeight: "medium",
-                          fontSize: 14,
+                          fontSize: "8px",
                         }}
                       >
                         {`REF #2: ${data[22]}`}
@@ -407,13 +487,13 @@ const MyDocument = ({ csvData }) => {
                         flexDirection: "flex-end",
                         justifyContent: "flex-end",
                         alignItems: "flex-end",
-                        marginTop: 50,
+                        marginTop: 16,
                         padding: 0.1,
                       }}
                     >
                       <Text
                         style={{
-                          fontSize: 14,
+                          fontSize: "7px",
                           textAlign: "right",
                           marginRight: 6,
                         }}
