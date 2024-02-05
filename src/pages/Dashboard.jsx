@@ -33,9 +33,7 @@ function Dashboard() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
-      console.log("before condition user", user);
       if (!user) {
-        console.log(user, "useruseruseruser");
         navigate("/");
       }
     });
@@ -46,7 +44,6 @@ function Dashboard() {
     try {
       await signOut(auth);
       navigate("/");
-      console.log("User logout!");
     } catch (error) {
       console.error("Error logging out:", error);
     }
@@ -60,40 +57,6 @@ function Dashboard() {
     );
   };
 
-  // const handleDownloadAll = async () => {
-  //   const fileBlobs = [];
-
-  //   await Promise.all(
-  //     csvData?.map(async (data, index) => {
-  //       const trackingId = randomAlphanumeric(18, "uppercase");
-  //       const pdfData = await generatePDF(
-  //         () => document.getElementById(`content-id-${index}`),
-  //         options
-  //       );
-  //       console.log("pdfData", pdfData);
-
-  //       // Convert the pdfData (which might be a DOM element or similar) to a Blob
-  //       const pdfBlob = new Blob([pdfData], { type: "application/pdf" });
-  //       console.logo(pdfBlob);
-  //       fileBlobs.push({ name: `${trackingId}.pdf`, content: pdfBlob });
-  //     })
-  //   );
-
-  //   const zip = new JSZip();
-
-  //   fileBlobs.forEach((file) => {
-  //     zip.file(file.name, file.content);
-  //   });
-
-  //   const zipBlob = await zip.generateAsync({ type: "blob" });
-
-  //   const link = document.createElement("a");
-  //   link.href = URL.createObjectURL(zipBlob);
-  //   link.download = "slips.zip";
-  //   document.body.appendChild(link);
-  //   link.click();
-  //   document.body.removeChild(link);
-  // };
 
   if (user) {
     return (
@@ -136,18 +99,7 @@ function Dashboard() {
             />
           </label>
         </div>
-        {/* {csvData ? (
-          <button
-            onClick={handleDownloadAll}
-            className="bg-blue-50 text-blue-600 rounded-lg py-2 px-6 hover:bg-blue-100 border border-blue-600 m-4"
-          >
-            Download All PDFs
-            
-          </button>
-        ) : (
-          ""
-        )} */}
-
+        
         {csvData?.length > 0 && csvData && (
           <>
             <div className="my-4 px-4 sm:w-[20%] sm:ml-20 ml-2">
