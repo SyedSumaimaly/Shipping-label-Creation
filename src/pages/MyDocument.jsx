@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import {
   PDFDownloadLink,
   Page,
@@ -7,63 +7,54 @@ import {
   Document,
   StyleSheet,
   Image,
-  Canvas,
   Font,
 } from "@react-pdf/renderer";
-import { randomAlphanumeric } from "random-string-alphanumeric-generator";
 import bwipjs from "bwip-js";
-
-// import { Barcode } from "@react-pdf/barcode";
-import Barcode from "react-barcode";
-// import Barcode from "react-jsbarcode";
 
 Font.register({
   family: "Poppins",
   fonts: [
-    {
-      src: "../../public/Poppins/Poppins-SemiBold.ttf",
-      fontWeight: 600,
-    },
-    {
-      src: "../../public/Poppins/Poppins-Bold.ttf",
-      fontWeight: 700,
-    },
-    {
-      src: "../../public/Poppins/Poppins-ExtraBold.ttf",
-      fontWeight: 900,
-    },
+    { src: "/Poppins/Poppins-SemiBold.ttf", fontWeight: 600 },
+    { src: "/Poppins/Poppins-Bold.ttf", fontWeight: 700 },
+    { src: "/Poppins/Poppins-ExtraBold.ttf", fontWeight: 900 },
   ],
 });
 
 const styles = StyleSheet.create({
-  semiBoldText: {
+  semiBoldText: { fontFamily: "Poppins", fontWeight: 600 },
+  boldText: { fontWeight: 700, fontFamily: "Poppins" },
+  underShipTo: {
+    fontWeight: 800,
     fontFamily: "Poppins",
-    fontWeight: 600,
+    marginBottom: 2,
+    fontSize: "9.6px",
+    marginTop: 6,
+    transform: "scaleY(2)",
+    paddingBottom: 2,
   },
-  boldText: {
-    fontWeight: 700, // This will use the 700 font weight
+  StretchBoldText: {
+    fontWeight: 700,
     fontFamily: "Poppins",
+    transform: "scaleY(2)",
+    fontSize: 16,
   },
-  extraboldText: {
+  extraboldText: { fontWeight: 900, fontFamily: "Poppins" },
+  barUpperText: {
     fontWeight: 900,
     fontFamily: "Poppins",
+    fontSize: 14,
+    marginBottom: 3,
+    zIndex: 10,
+    marginTop: 2,
+    transform: "scaleY(2)",
   },
-  normal: {
-    fontFamily: "Poppins",
-    fontWeight: 600,
-    fontSize: 12,
-  },
-  normalTwo: {
-    fontFamily: "Poppins",
-    fontWeight: 600,
-    fontSize: 10,
-  },
+  normal: { fontFamily: "Poppins", fontWeight: 600, fontSize: 12 },
+  normalTwo: { fontFamily: "Poppins", fontWeight: 600, fontSize: 10 },
   second: {
-    fontWeight: 700,
-    fontSize: 42,
+    fontWeight: 600,
+    fontSize: 36,
     fontFamily: "Poppins",
     paddingRight: 4,
-    marginTop: -8,
   },
 });
 
@@ -73,7 +64,6 @@ const MyDocument = ({ csvData }) => {
     const day = currentDate.getDate().toString().padStart(2, "0");
     const month = (currentDate.getMonth() + 1).toString().padStart(2, "0");
     const year = currentDate.getFullYear();
-
     return `${day},${month},${year}`;
   };
 
@@ -81,12 +71,8 @@ const MyDocument = ({ csvData }) => {
     const currentDate = new Date();
     const month = (currentDate.getMonth() + 1).toString().padStart(2, "0");
     const year = currentDate.getFullYear();
-
     return `${month}/${year}`;
   };
-
-  const canvasRef = React.useRef(null);
-  // Access the canvas element here
 
   const generateMaxiCodeImage = (barcodeValueTwo) => {
     const canvas = document.createElement("canvas");
@@ -105,11 +91,12 @@ const MyDocument = ({ csvData }) => {
       return null;
     }
   };
+
   const generateBarCodeImage = (barcodeValueThree) => {
     const canvas = document.createElement("canvas");
     try {
       bwipjs.toCanvas(canvas, {
-        bcid: "code11",
+        bcid: "code128",
         text: barcodeValueThree,
         scale: 1,
         height: 10,
@@ -122,6 +109,7 @@ const MyDocument = ({ csvData }) => {
       return null;
     }
   };
+
   const generateBarCodeTwoImage = (barcodeValueFour) => {
     const canvas = document.createElement("canvas");
     try {
@@ -146,20 +134,16 @@ const MyDocument = ({ csvData }) => {
         csvData.length > 0 &&
         csvData.map((data, index) => {
           const maxiCodeImage = generateMaxiCodeImage(
-            `01 96${
-              data && data[14]?.padEnd(9, "0")
-            } 840 002 1Z10838454 UPSN 40612Y 015 1/1 ${data[16]} N ${
-              data[10]
-            } ${data[13]}`
+            `[)> 01 96${
+              data && data[14]?.replace("-", "").padEnd(9, "0")
+            } 840 002 ${data[23].slice(0, 2)}${data[23].slice(
+              data[23].length - 8,
+              data[23].length
+            )} UPSN ${data[23].slice(2, 8)} 015 1/1 ${data[16]} N ${data[10]} ${
+              data[13]
+            }`
           );
-          console.log(
-            `01 96${data[14]?.padEnd(
-              9,
-              "0"
-            )} 840 002 1Z10838454 UPSN 40612Y 015 1/1 ${data && data[16]} N ${
-              data[10]
-            } ${data[13]}`
-          );
+
           if (
             !data[0] ||
             !data[2] ||
@@ -183,49 +167,30 @@ const MyDocument = ({ csvData }) => {
           ) {
             return null;
           }
-          const generateUpsTrackingNumber = () => {
-            const randomSection = `${Math.floor(Math.random() * 10000)
-              .toString()
-              .padStart(4, "0")}`;
 
-            return `1Z 723 90Y 02 ${randomSection.slice(
-              0,
-              4
-            )} ${randomSection.slice(4)}`;
-          };
-          const trackingId = generateUpsTrackingNumber();
-          console.log(trackingId, "trackingId");
-          // let canvas, canvas2;
-          const zipCode = data[14];
+          const zipCode1 = data[14];
+          const zipCode = zipCode1.replace("-", "");
           const barcodeValue = `420${
             zipCode?.length === 5 ? zipCode : zipCode?.slice(0, 9)
           }`;
-          console.log("barcodeValue One", barcodeValue, "barcodeValue One");
-          // canvas = document.createElement("canvas");
-          // JsBarcode(canvas, barcodeValue, {
-          //   displayValue: false,
-          //   width: 1,
-          //   height: 30,
-          // });
-          // const barcode = canvas.toDataURL();
-
-          // canvas2 = document.createElement("canvas");
-          // JsBarcode(canvas2, trackingId, {
-          //   displayValue: false,
-          //   width: 1,
-          //   height: 50,
-          // });
-          // const barcode2 = canvas2.toDataURL();
           const barcodeOne = generateBarCodeImage(barcodeValue);
-          const barcodeTwo = generateBarCodeTwoImage(trackingId);
+          const barcodeTwo = generateBarCodeTwoImage(data[23]);
           const randomTwoDigitNumber = Math.floor(Math.random() * 90) + 10;
+
+          let inputValue = data[23];
+          let formattedValue = [
+            inputValue?.slice(0, 2),
+            inputValue?.slice(2, 5),
+            inputValue?.slice(5, 8),
+            inputValue?.slice(8, 10),
+            inputValue?.slice(10, 14),
+            inputValue?.slice(14),
+          ].join(" ");
 
           return (
             <Page size="A6" key={index} id={`content-id-${index}`}>
               <View>
-                <View
-                // className="w-[400px]"
-                >
+                <View>
                   <View
                     style={{
                       backgroundColor: "#fff",
@@ -239,7 +204,6 @@ const MyDocument = ({ csvData }) => {
                         flexDirection: "row",
                         alignItems: "flex-start",
                         padding: 2,
-                        // justifyContent: "space-between",
                       }}
                     >
                       <View style={{ fontSize: "8px" }}>
@@ -263,22 +227,19 @@ const MyDocument = ({ csvData }) => {
                             flexDirection: "row",
                             alignItems: "center",
                             justifyContent: "space-between",
-                            width: 75,
-                            // borderWidth: 1,
-                            // borderColor: "black",
+                            width: 128,
                           }}
                         >
                           <Text style={styles.normal}>{`${data[16]} LBS`}</Text>
                           <Text style={styles.normal}>1 OF 1</Text>
                         </View>
-                        <Text style={{ fontSize: "8px", marginLeft: 20 }}>
+                        <Text style={{ fontSize: "8px", marginLeft: 72 }}>
                           DWT: {`${data[17]},${data[18]},${data[19]}`}
                         </Text>
                       </View>
                       <View></View>
                     </View>
-
-                    <View style={{ padding: 0, marginTop: 16, paddingLeft: 2 }}>
+                    <View style={{ padding: 0, marginTop: 12, paddingLeft: 2 }}>
                       <Text style={styles.normalTwo}>SHIP TO:</Text>
                       <View
                         style={{
@@ -315,16 +276,7 @@ const MyDocument = ({ csvData }) => {
                           {data[10]}
                         </Text>
                         <Text
-                          style={
-                            ({
-                              display: "block",
-                              fontWeight: "bold",
-                              marginBottom: 1,
-                              fontSize: "14",
-                              marginTop: 6,
-                            },
-                            styles.boldText)
-                          }
+                          style={styles.underShipTo}
                         >{`${data[12]} ${data[13]} ${data[14]}`}</Text>
                       </View>
                     </View>
@@ -358,42 +310,21 @@ const MyDocument = ({ csvData }) => {
                         style={{
                           width: "70%",
                           height: 80,
-                          padding: 0,
+                          paddingTop: 3,
                           paddingLeft: 4,
+                          paddingBottom: 0,
                           borderLeftWidth: 1,
                           borderLeftColor: "#000",
                           position: "relative",
                         }}
                       >
-                        <Text
-                          style={
-                            ({
-                              fontSize: 22,
-                              marginBottom: 0,
-                              zIndex: 10,
-                              // padddingLeft: 10,
-                              marginTop: 2,
-                            },
-                            styles.extraboldText)
-                          }
-                        >
-                          {`${data[13]} ${
-                            data[14]?.slice(0, 3) || ""
-                          } 9-${randomTwoDigitNumber}`}
-                        </Text>
+                        <Text style={styles.barUpperText}>{`${data[13]} ${
+                          data[14]?.slice(0, 3) || ""
+                        } 9-${randomTwoDigitNumber}`}</Text>
                         {barcodeOne && (
                           <Image
                             src={barcodeOne}
-                            style={{
-                              width: 150,
-                              height: 45,
-                              paddingVertical: 1,
-                              // borderWidth: 1,
-                              // borderColor: "black",
-                              // margin: "auto",
-                              // marginHorizontal: "auto",
-                              marginLeft: 8,
-                            }}
+                            style={{ width: 150, height: 45, marginLeft: 8 }}
                           />
                         )}
                       </View>
@@ -409,23 +340,20 @@ const MyDocument = ({ csvData }) => {
                       style={{
                         display: "flex",
                         flexDirection: "row",
-                        alignItems: "start",
+                        alignItems: "center",
                         justifyContent: "space-between",
-                        marginBottom: -10,
+                        marginVertical: -4,
+                        marginBottom: -7,
                       }}
                     >
                       <View style={{ marginLeft: 3 }}>
-                        <Text style={({ fontSize: "24px" }, styles.boldText)}>
+                        <Text style={styles.StretchBoldText}>
                           UPS 2ND DAY AIR
                         </Text>
                         <Text
-                          style={{
-                            fontSize: "10px",
-                            paddingHorizontal: 2,
-                            marginVertical: -2,
-                          }}
+                          style={{ fontSize: "10px", paddingHorizontal: 2 }}
                         >
-                          TRACKING #: {trackingId}
+                          TRACKING #: {formattedValue}
                         </Text>
                       </View>
                       <View>
@@ -447,7 +375,6 @@ const MyDocument = ({ csvData }) => {
                         width: 220,
                         marginHorizontal: "auto",
                         paddingVertical: 6,
-                        // paddingHorizontal: 2,
                       }}
                     >
                       {barcodeTwo && <Image src={barcodeTwo} />}
@@ -464,7 +391,7 @@ const MyDocument = ({ csvData }) => {
                       <Text style={{ fontSize: "8px" }}>DESC: {data[20]}</Text>
                       <Text
                         style={{
-                          marginTop: 10,
+                          marginTop: 8,
                           fontWeight: "medium",
                           fontSize: "8px",
                         }}
@@ -477,9 +404,7 @@ const MyDocument = ({ csvData }) => {
                           fontWeight: "medium",
                           fontSize: "8px",
                         }}
-                      >
-                        {`REF #2: ${data[22]}`}
-                      </Text>
+                      >{`REF #2: ${data[22]}`}</Text>
                     </View>
                     <View
                       style={{
@@ -487,7 +412,7 @@ const MyDocument = ({ csvData }) => {
                         flexDirection: "flex-end",
                         justifyContent: "flex-end",
                         alignItems: "flex-end",
-                        marginTop: 16,
+                        marginTop: 13.1,
                         padding: 0.1,
                       }}
                     >
@@ -497,9 +422,7 @@ const MyDocument = ({ csvData }) => {
                           textAlign: "right",
                           marginRight: 6,
                         }}
-                      >
-                        {`ISH 13.00F LASER 15.5V ${getCurrentMonth()}`}
-                      </Text>
+                      >{`ISH 13.00F LASER 15.5V ${getCurrentMonth()}`}</Text>
                     </View>
                   </View>
                 </View>
@@ -510,18 +433,5 @@ const MyDocument = ({ csvData }) => {
     </Document>
   );
 };
-
-// const DownloadLink = ({ csvData }) => (
-//   <div>
-// <PDFDownloadLink
-//   document={<MyDocument csvData={csvData} />}
-//   fileName="your-document.pdf"
-// >
-//   {({ blob, url, loading, error }) =>
-//     loading ? "Loading document..." : "Download PDF"
-//   }
-// </PDFDownloadLink>
-//   </div>
-// );
 
 export default MyDocument;

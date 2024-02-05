@@ -1,50 +1,34 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import firebase from "../config/firebase";
-import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-} from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import CheckAuth from "../Components/AuthCheck";
 
 export default function Login() {
-  // const auth = getAuth();
   const navigate = useNavigate();
+  const auth = getAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
+
   const submitHandle = async (e) => {
     e.preventDefault();
-    // setLoading(true);
-    await firebase
-      .auth()
-      .signInWithEmailAndPassword(email, password)
-      .then((userCredential) => {
-        // Signed in
-        console.log(userCredential, "users");
-        const user = userCredential.user;
-        // setSuccess(true);
-        // setLoading(false);
-        navigate("/dashboard");
-        // ...
-      })
-      .catch((error) => {
-        console.error(error); // Log the error to the console
-        // setLoading(false);
-        console.log(error, "error");
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        // setSuccess(false);
-        navigate("/");
-        // ..
-      });
-    // setLoading(false);
+
+    try {
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
+      navigate("/dashboard");
+    } catch (error) {
+      console.error(error, "error");
+      navigate("/");
+    }
   };
 
   return (
-    <>
+    <CheckAuth>
       <section className="bg-gray-50 dark:bg-gray-900">
         <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
           <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
@@ -101,6 +85,6 @@ export default function Login() {
           </div>
         </div>
       </section>
-    </>
+    </CheckAuth>
   );
 }
